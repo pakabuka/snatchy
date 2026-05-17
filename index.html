@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snatchy — Legal Gazette</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=UnifrakturMaguntia&family=IM+Fell+English:ital@0;1&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #EDE5C5;
+    --paper-dark: #D9CDA3;
+    --ink: #1A1510;
+    --ink-faded: rgba(26,21,16,0.55);
+    --ink-light: rgba(26,21,16,0.28);
+    --cash: #D4C978;
+    --cash-bg: #E8DFA8;
+    --debt: #7A1412;
+    --green: #083818;
+    --rule: #1A1510;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { background: var(--ink); }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Libre Baskerville', Georgia, serif;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0;
+    position: relative;
+    min-height: 100vh;
+    box-shadow: 0 0 80px rgba(0,0,0,0.7);
+  }
+
+  /* Newsprint grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(26,21,16,0.025) 0px, transparent 1px, transparent 18px, rgba(26,21,16,0.025) 18px),
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    max-width: 860px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* ─── HEADER ─── */
+  .masthead {
+    padding: 28px 36px 0;
+    border-bottom: 3px double var(--ink);
+  }
+
+  .masthead-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 10px;
+    font-family: 'IM Fell English', Georgia, serif;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faded);
+  }
+
+  .paper-name {
+    font-family: 'UnifrakturMaguntia', cursive;
+    font-size: clamp(42px, 8vw, 72px);
+    line-height: 1;
+    color: var(--ink);
+    display: block;
+    text-align: center;
+    letter-spacing: -1px;
+  }
+
+  .masthead-subtitle {
+    font-family: 'IM Fell English', Georgia, serif;
+    font-style: italic;
+    font-size: 13px;
+    text-align: center;
+    color: var(--ink-faded);
+    letter-spacing: 0.08em;
+    margin: 6px 0 10px;
+  }
+
+  .edition-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    font-family: 'IM Fell English', Georgia, serif;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-faded);
+    margin-bottom: 0;
+  }
+
+  .edition-center {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 900;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  /* ─── MAIN HEADLINE ─── */
+  .main-headline {
+    padding: 20px 36px 16px;
+    border-bottom: 2px solid var(--ink);
+    text-align: center;
+  }
+
+  .kicker {
+    font-family: 'IM Fell English', Georgia, serif;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--ink-faded);
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 900;
+    font-size: clamp(28px, 6vw, 48px);
+    line-height: 1.1;
+    color: var(--ink);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .deck {
+    font-family: 'IM Fell English', Georgia, serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--ink-faded);
+    margin-top: 10px;
+    line-height: 1.55;
+  }
+
+  /* ─── LAYOUT ─── */
+  .page-body {
+    padding: 0 36px;
+  }
+
+  .columns-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  .columns-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+
+  .col {
+    padding: 20px 18px;
+    border-right: 1px solid var(--ink);
+  }
+
+  .col:last-child {
+    border-right: none;
+  }
+
+  .col-wide {
+    padding: 20px 18px;
+    border-right: 1px solid var(--ink);
+    grid-column: span 2;
+  }
+
+  /* ─── SECTION RULES ─── */
+  .section-rule {
+    border: none;
+    border-top: 3px double var(--ink);
+    margin: 0;
+  }
+
+  .section-rule-thin {
+    border: none;
+    border-top: 1px solid var(--ink);
+    margin: 0;
+  }
+
+  .section-rule-thick {
+    border: none;
+    border-top: 4px solid var(--ink);
+    margin: 0;
+  }
+
+  /* ─── SECTION HEADERS ─── */
+  .section-head {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 900;
+    font-size: clamp(18px, 3.5vw, 26px);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+    line-height: 1.15;
+    margin-bottom: 10px;
+  }
+
+  .section-head-sm {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+    margin-bottom: 7px;
+    margin-top: 16px;
+  }
+
+  .section-head-sm:first-child {
+    margin-top: 0;
+  }
+
+  /* ─── BODY TEXT ─── */
+  p {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: 12.5px;
+    line-height: 1.72;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+
+  p:last-child { margin-bottom: 0; }
+
+  .byline {
+    font-family: 'IM Fell English', Georgia, serif;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-faded);
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  /* ─── PULL QUOTES ─── */
+  .pull-quote {
+    border-top: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+    padding: 12px 4px;
+    margin: 16px 0;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    font-style: italic;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--ink);
+    text-align: center;
+  }
+
+  /* ─── NOTICE BOXES ─── */
+  .notice-box {
+    border: 1.5px solid var(--ink);
+    padding: 12px 14px;
+    margin: 14px 0;
+    background: var(--cash-bg);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .notice-box-dark {
+    border: 1.5px solid var(--ink);
+    padding: 12px 14px;
+    margin: 14px 0;
+    background: var(--ink);
+    color: var(--paper);
+    box-shadow: 3px 3px 0 var(--ink-faded);
+  }
+
+  .notice-box-dark p {
+    color: var(--paper);
+    font-size: 11.5px;
+  }
+
+  .notice-box-dark .section-head-sm {
+    color: var(--paper);
+  }
+
+  .notice-box .notice-label {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 900;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--ink-faded);
+    margin-bottom: 6px;
+  }
+
+  .notice-box-dark .notice-label {
+    color: rgba(237,229,197,0.6);
+  }
+
+  /* ─── DATESTAMP ─── */
+  .datestamp {
+    font-family: 'IM Fell English', Georgia, serif;
+    font-size: 10.5px;
+    font-style: italic;
+    color: var(--ink-faded);
+    margin-bottom: 8px;
+  }
+
+  /* ─── SECTION DIVIDER WITH LABEL ─── */
+  .label-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 8px 36px;
+    border-top: 3px double var(--ink);
+    border-bottom: 1px solid var(--ink);
+    background: var(--ink);
+  }
+
+  .label-divider span {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 900;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--paper);
+    white-space: nowrap;
+  }
+
+  .label-divider::before,
+  .label-divider::after {
+    content: '✦';
+    color: var(--cash);
+    font-size: 10px;
+    flex-shrink: 0;
+  }
+
+  /* ─── FULL WIDTH SECTIONS ─── */
+  .full-col {
+    padding: 20px 36px;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  /* ─── TERMS ARTICLE LIST ─── */
+  .article-list {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0;
+  }
+
+  .article-list li {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: 12px;
+    line-height: 1.68;
+    color: var(--ink);
+    padding: 7px 0 7px 16px;
+    border-bottom: 1px solid rgba(26,21,16,0.18);
+    position: relative;
+  }
+
+  .article-list li:last-child { border-bottom: none; }
+
+  .article-list li::before {
+    content: '§';
+    position: absolute;
+    left: 0;
+    top: 7px;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    color: var(--ink-faded);
+    font-size: 11px;
+  }
+
+  .article-num {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-faded);
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  /* ─── TICKER STRIP ─── */
+  .ticker {
+    background: var(--ink);
+    padding: 6px 36px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .ticker-inner {
+    display: inline-block;
+    animation: ticker 28s linear infinite;
+    font-family: 'IM Fell English', Georgia, serif;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cash);
+  }
+
+  @keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    padding: 16px 36px;
+    border-top: 3px double var(--ink);
+    text-align: center;
+  }
+
+  .footer p {
+    font-family: 'IM Fell English', Georgia, serif;
+    font-size: 10px;
+    color: var(--ink-faded);
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 4px;
+  }
+
+  .footer-rule {
+    width: 60px;
+    height: 1px;
+    background: var(--ink-light);
+    margin: 10px auto;
+  }
+
+  /* ─── ORNAMENTS ─── */
+  .ornament {
+    text-align: center;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink-faded);
+    letter-spacing: 0.5em;
+    margin: 8px 0;
+  }
+
+  /* ─── INITIAL CAP ─── */
+  .drop-cap::first-letter {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 900;
+    font-size: 52px;
+    line-height: 0.82;
+    float: left;
+    margin-right: 6px;
+    margin-top: 3px;
+    color: var(--ink);
+  }
+
+  /* ─── HIGHLIGHT ROW ─── */
+  .highlight-row {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .highlight-cell {
+    flex: 1;
+    padding: 10px 14px;
+    border-right: 1px solid var(--ink);
+    text-align: center;
+  }
+
+  .highlight-cell:last-child { border-right: none; }
+
+  .highlight-cell .cell-label {
+    font-family: 'IM Fell English', Georgia, serif;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-faded);
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .highlight-cell .cell-value {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 900;
+    font-size: 16px;
+    color: var(--ink);
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 600px) {
+    .masthead, .page-body, .full-col, .label-divider, .footer, .ticker { padding-left: 18px; padding-right: 18px; }
+    .columns-2, .columns-3 { grid-template-columns: 1fr; }
+    .col-wide { grid-column: span 1; }
+    .col { border-right: none; border-bottom: 1px solid var(--ink); }
+    .col:last-child { border-bottom: none; }
+    .paper-name { font-size: 38px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TICKER -->
+<div class="ticker">
+  <span class="ticker-inner">
+    SNATCHY LEGAL GAZETTE &nbsp;✦&nbsp; PRIVACY POLICY IN FULL &nbsp;✦&nbsp; TERMS OF USE &nbsp;✦&nbsp; FIREBASE DATA NOTICE &nbsp;✦&nbsp; CALIFORNIA RIGHTS &nbsp;✦&nbsp; GDPR COMPLIANCE &nbsp;✦&nbsp; CHILDREN'S PRIVACY NOTICE &nbsp;✦&nbsp; EFFECTIVE IMMEDIATELY &nbsp;✦&nbsp; 
+    SNATCHY LEGAL GAZETTE &nbsp;✦&nbsp; PRIVACY POLICY IN FULL &nbsp;✦&nbsp; TERMS OF USE &nbsp;✦&nbsp; FIREBASE DATA NOTICE &nbsp;✦&nbsp; CALIFORNIA RIGHTS &nbsp;✦&nbsp; GDPR COMPLIANCE &nbsp;✦&nbsp; CHILDREN'S PRIVACY NOTICE &nbsp;✦&nbsp; EFFECTIVE IMMEDIATELY &nbsp;✦&nbsp;
+  </span>
+</div>
+
+<!-- MASTHEAD -->
+<div class="masthead">
+  <div class="masthead-top">
+    <span>Est. Present Day</span>
+    <span>Legal & Compliance Edition</span>
+    <span>Price: Free to Read</span>
+  </div>
+
+  <span class="paper-name">Snatchy</span>
+  <p class="masthead-subtitle">The Official Legal Gazette of the Cash Market &mdash; Published in the Public Interest</p>
+
+  <div class="edition-bar">
+    <span>Vol. I, No. 1</span>
+    <span class="edition-center">✦ &nbsp; Privacy Policy &amp; Terms of Use &nbsp; ✦</span>
+    <span>All Rights Reserved</span>
+  </div>
+</div>
+
+<!-- MAIN HEADLINE -->
+<div class="main-headline">
+  <span class="kicker">Official Notice to All Bankers &amp; Market Participants</span>
+  <h1>Your Rights, Our Duties,<br>& The Rules of the Market</h1>
+  <p class="deck">
+    A full accounting of what we collect, how we use it, who sees it, and what you may do about it — presented herein without obfuscation, in the tradition of plain dealing.
+  </p>
+</div>
+
+<!-- QUICK SUMMARY ROW -->
+<div class="highlight-row">
+  <div class="highlight-cell">
+    <span class="cell-label">Data Sold?</span>
+    <span class="cell-value">Never</span>
+  </div>
+  <div class="highlight-cell">
+    <span class="cell-label">Ads Shown?</span>
+    <span class="cell-value">None</span>
+  </div>
+  <div class="highlight-cell">
+    <span class="cell-label">Children Under 13?</span>
+    <span class="cell-value">Not Served</span>
+  </div>
+  <div class="highlight-cell">
+    <span class="cell-label">Storage Provider</span>
+    <span class="cell-value">Firebase</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ PRIVACY POLICY ═══════════════════════════ -->
+
+<div class="label-divider">
+  <span>Part One &nbsp;&mdash;&nbsp; Privacy Policy</span>
+</div>
+
+<!-- INTRO COLUMNS -->
+<div class="page-body">
+  <div class="columns-2">
+    <div class="col">
+      <h2 class="section-head">What This Policy Covers</h2>
+      <span class="byline">Legal Desk &nbsp;|&nbsp; Compliance Bureau</span>
+      <p class="drop-cap">This Privacy Policy governs the collection, use, retention, and disclosure of information gathered when you play Snatchy, a multiplayer market-floor game distributed as a mobile application. By entering your name and joining or creating a market, you acknowledge that you have read and understood the terms described herein.</p>
+      <p>Snatchy is designed to be minimal in its data footprint. We collect only what is genuinely necessary to make the game work across multiple devices simultaneously. Nothing more is gathered; nothing superfluous is retained.</p>
+      <p>This policy applies to all versions of the Snatchy application and any related platforms or distribution channels through which the game is made available. It does not apply to third-party services linked from within the app except as described below.</p>
+    </div>
+    <div class="col">
+      <h2 class="section-head">Information Collected</h2>
+      <span class="byline">Data Inventory &nbsp;|&nbsp; Full Disclosure</span>
+      <p>When you use Snatchy, the following categories of information are processed:</p>
+      <div class="notice-box">
+        <div class="notice-label">✦ &nbsp; Data Categories</div>
+        <ul class="article-list">
+          <li><span class="article-num">Category A — Identity</span>The player name you enter at the start of your session. This is a name of your own choosing and need not be your real name.</li>
+          <li><span class="article-num">Category B — Market Activity</span>The market code you create or join; your score as accumulated during rounds; your ready status and exit status within a market.</li>
+          <li><span class="article-num">Category C — Gameplay Events</span>Records of cash note and debt note interactions — specifically, which notes were collected and when — used to prevent duplicate collection and synchronise state.</li>
+          <li><span class="article-num">Category D — Technical Metadata</span>Timestamps of joining, readiness changes, and collection events; a randomly generated device session ID used to identify your player record within a market. This ID is not linked to your device identity or any persistent identifier.</li>
+        </ul>
+      </div>
+      <p>We do not collect email addresses, phone numbers, location data, device identifiers, IP addresses, behavioural advertising profiles, or any biometric data.</p>
+    </div>
+  </div>
+
+  <hr class="section-rule">
+
+  <div class="columns-3">
+    <div class="col">
+      <h2 class="section-head">How We Use Your Information</h2>
+      <span class="byline">Purpose Limitation &nbsp;|&nbsp; Strict Construction</span>
+      <p>All data collected is used exclusively for the following purposes, and for no others:</p>
+      <ul class="article-list">
+        <li>Creating and joining multiplayer markets in real time.</li>
+        <li>Synchronising game state — scores, note positions, readiness — across all connected devices simultaneously.</li>
+        <li>Displaying the roster, scores, and player statuses within a market.</li>
+        <li>Preventing the same note from being collected twice through atomic transaction checks.</li>
+        <li>Determining round results and the final winner of each game.</li>
+        <li>Enabling the host to start and advance rounds, and to reset the game for a new session.</li>
+      </ul>
+      <p>We do not use your information for profiling, targeted advertising, analytics resale, or any purpose unrelated to operating the game.</p>
+    </div>
+    <div class="col">
+      <h2 class="section-head">Visibility to Other Players</h2>
+      <span class="byline">Transparency Notice &nbsp;|&nbsp; Fellow Bankers</span>
+      <div class="pull-quote">"Your name is your brand on the market floor. Choose it wisely."</div>
+      <p>Certain data is visible to other participants in the same market. This is inherent to the multiplayer nature of the game. The following fields are visible to co-players:</p>
+      <ul class="article-list">
+        <li>Your player name as entered.</li>
+        <li>Your current ready status (ready or not ready).</li>
+        <li>Your score at all times during and after rounds.</li>
+        <li>Whether you have exited the market.</li>
+      </ul>
+      <p>Players in other markets, or users not in your current market, cannot see any of your data. Markets are fully isolated from one another.</p>
+      <p><strong>Important:</strong> Do not use sensitive personal information — your full name, address, identification numbers, or any other private data — as your player name. Your chosen name will be visible to strangers.</p>
+    </div>
+    <div class="col">
+      <h2 class="section-head">Sharing & Service Providers</h2>
+      <span class="byline">Disclosure Register &nbsp;|&nbsp; Third Parties</span>
+      <p>Snatchy uses <strong>Google Firebase Firestore</strong>, a cloud database service, to store and synchronise all gameplay data in real time. Firebase is operated by Google LLC and is subject to Google's own privacy policies and terms of service.</p>
+      <p>Firebase processes the data described in this policy solely to provide the infrastructure necessary for the game to function. No other third-party analytics, advertising, tracking, or data broker services are integrated into Snatchy.</p>
+      <div class="notice-box">
+        <div class="notice-label">✦ &nbsp; Third-Party Notice</div>
+        <p style="font-size:11.5px; margin:0;">Firebase Firestore is the sole third-party data processor. We do not sell, rent, lease, licence, or otherwise transfer your personal information to any other party for any commercial purpose whatsoever.</p>
+      </div>
+      <p>We may disclose information if required to do so by law, court order, or binding governmental authority, in which case we will disclose only the minimum required.</p>
+    </div>
+  </div>
+
+  <hr class="section-rule">
+
+  <div class="columns-2">
+    <div class="col">
+      <h2 class="section-head">Data Retention</h2>
+      <span class="byline">Records Management &nbsp;|&nbsp; Archival Policy</span>
+      <p>Gameplay data — market records, player names, scores, and note interaction logs — is retained only for as long as is reasonably necessary to operate the service, resolve disputes, and comply with applicable legal obligations.</p>
+      <p>Market records are not automatically deleted at the conclusion of a game. They may be retained for a reasonable period to facilitate debugging, fraud prevention, and service improvement. However, given the pseudonymous and limited nature of the data, retention does not present a material privacy risk in ordinary circumstances.</p>
+      <p>If you wish to request deletion of any data associated with your session, please contact the app operator using the information provided at the end of this document. Deletion requests will be handled promptly and in good faith.</p>
+      <div class="notice-box">
+        <div class="notice-label">✦ &nbsp; Session IDs</div>
+        <p style="font-size:11.5px; margin:0;">The randomly generated player ID used during your session is created fresh each time you enter the name screen. It is not persistent across app installations or device resets and cannot be used to track you over time.</p>
+      </div>
+    </div>
+    <div class="col">
+      <h2 class="section-head">Security Measures</h2>
+      <span class="byline">Protection Desk &nbsp;|&nbsp; Technical Safeguards</span>
+      <p>We implement reasonable technical and organisational measures to protect the information processed in connection with Snatchy. These include:</p>
+      <ul class="article-list">
+        <li>Transmission of all data over encrypted HTTPS connections via Firebase's secure SDK.</li>
+        <li>Firestore security rules that restrict read and write access to participants within a given market.</li>
+        <li>Atomic Firestore transactions to prevent race conditions in note collection — the same transaction mechanism that protects the game also protects data integrity.</li>
+        <li>No storage of sensitive personal data that would constitute a high-risk breach if exposed.</li>
+      </ul>
+      <p>No system is perfectly secure. While we take reasonable steps to protect your information, we cannot guarantee absolute security against all threats. In the event of a material breach affecting your privacy rights, we will notify affected users in accordance with applicable law.</p>
+    </div>
+  </div>
+
+  <hr class="section-rule">
+
+  <div class="columns-3">
+    <div class="col">
+      <h2 class="section-head">Children's Privacy</h2>
+      <span class="byline">Minors Protection &nbsp;|&nbsp; COPPA Compliance</span>
+      <p>Snatchy is not directed at children under the age of 13. We do not knowingly collect personal information from children under 13. The game involves financial themes — cash, debt, competition — suitable for teenagers and adults.</p>
+      <p>If you are a parent or guardian and believe that a child under 13 has provided personal information through the application, please contact the app operator immediately. Upon verification, we will take prompt steps to delete such information from our systems.</p>
+      <p>Users in jurisdictions where the age of digital consent is higher than 13 — including, for example, certain EU member states where the age is 16 — should comply with their local requirements.</p>
+    </div>
+    <div class="col">
+      <h2 class="section-head">Your Privacy Rights</h2>
+      <span class="byline">Rights Register &nbsp;|&nbsp; By Jurisdiction</span>
+      <p>Depending on where you live, you may have specific rights regarding your personal information. These are summarised below:</p>
+      <ul class="article-list">
+        <li><span class="article-num">Right to Know</span>You may request a description of the categories and specific pieces of personal information we have collected about you.</li>
+        <li><span class="article-num">Right to Access</span>You may request a copy of personal information associated with your session.</li>
+        <li><span class="article-num">Right to Correction</span>You may request correction of inaccurate personal information.</li>
+        <li><span class="article-num">Right to Deletion</span>You may request deletion of personal information we hold about you, subject to certain exceptions.</li>
+        <li><span class="article-num">Right to Portability</span>You may request your data in a structured, machine-readable format where technically feasible.</li>
+        <li><span class="article-num">Right to Object</span>You may object to certain processing activities.</li>
+        <li><span class="article-num">Non-Discrimination</span>You will not be denied service, penalised, or treated differently for exercising any of these rights.</li>
+      </ul>
+    </div>
+    <div class="col">
+      <h2 class="section-head">California Residents</h2>
+      <span class="byline">CCPA / CPRA Notice &nbsp;|&nbsp; State Compliance</span>
+      <p>If you reside in California, the California Consumer Privacy Act (CCPA) as amended by the California Privacy Rights Act (CPRA) grants you additional rights. In the past twelve months, Snatchy has:</p>
+      <div class="notice-box-dark">
+        <div class="notice-label">✦ &nbsp; CCPA Summary</div>
+        <ul class="article-list" style="list-style:none; padding:0; margin:0;">
+          <li style="color:var(--paper); border-color:rgba(237,229,197,0.2); padding:5px 0 5px 14px;">Collected: Names, gameplay data, session IDs.</li>
+          <li style="color:var(--paper); border-color:rgba(237,229,197,0.2); padding:5px 0 5px 14px;">Sold: Nothing.</li>
+          <li style="color:var(--paper); border-color:rgba(237,229,197,0.2); padding:5px 0 5px 14px;">Shared for advertising: Nothing.</li>
+          <li style="color:var(--paper); border-color:rgba(237,229,197,0.2); padding:5px 0 5px 14px; border-bottom:none;">Disclosed to service providers: Firebase (gameplay infrastructure only).</li>
+        </ul>
+      </div>
+      <p>To exercise your CCPA rights, contact the app operator. We do not require you to create an account to submit a request. We will verify your identity through reasonable means and respond within the timeframes required by law.</p>
+    </div>
+  </div>
+
+  <hr class="section-rule">
+
+  <div class="columns-2">
+    <div class="col">
+      <h2 class="section-head">EEA, UK & International Users</h2>
+      <span class="byline">GDPR Compliance &nbsp;|&nbsp; International Desk</span>
+      <p>For users in the European Economic Area (EEA) or the United Kingdom, the General Data Protection Regulation (GDPR) or UK GDPR applies. The legal bases for processing your data are as follows:</p>
+      <ul class="article-list">
+        <li><span class="article-num">Contractual Necessity</span>Processing your player name and gameplay data is necessary to provide the service you have requested — namely, participating in a multiplayer market.</li>
+        <li><span class="article-num">Legitimate Interest</span>Retaining records for debugging, fraud prevention, and service improvement, balanced against the minimal sensitivity of the data involved.</li>
+        <li><span class="article-num">Legal Obligation</span>Disclosures required by applicable law or binding authority.</li>
+      </ul>
+      <p>You have the right to lodge a complaint with your local supervisory authority if you believe your data has been processed unlawfully. EEA residents may contact the relevant Data Protection Authority in their member state.</p>
+    </div>
+    <div class="col">
+      <h2 class="section-head">Changes to This Policy</h2>
+      <span class="byline">Amendment Procedures &nbsp;|&nbsp; Notice of Updates</span>
+      <p>We reserve the right to update this Privacy Policy at any time. When material changes are made, we will update the policy as distributed with the application and, where feasible, notify users through the app itself.</p>
+      <p>Your continued use of Snatchy after any changes to this policy constitutes acceptance of the updated terms. If you do not agree with the revised policy, you should discontinue use of the application.</p>
+      <div class="pull-quote">"The market changes. Our commitment to your privacy does not."</div>
+      <p>We encourage you to review this policy periodically. The version distributed with the application is always the governing version. No prior versions remain in effect once superseded.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ TERMS OF USE ═══════════════════════════ -->
+
+<div class="label-divider">
+  <span>Part Two &nbsp;&mdash;&nbsp; Terms of Use</span>
+</div>
+
+<div class="full-col">
+  <span class="kicker">Binding Agreement &nbsp;|&nbsp; Read Before Playing</span>
+  <h2 class="section-head" style="font-size: clamp(22px, 4.5vw, 36px);">Terms &amp; Conditions of Market Participation</h2>
+  <p class="drop-cap">By downloading, installing, or using Snatchy, you agree to be bound by these Terms of Use. If you do not agree with any provision herein, you must not use the application. These Terms constitute a legally binding agreement between you (the "Banker" or "User") and the operator of Snatchy (the "Operator").</p>
+</div>
+
+<div class="page-body">
+  <div class="columns-2">
+    <div class="col">
+      <h2 class="section-head">Article I: Licence to Play</h2>
+
+      <h3 class="section-head-sm">1.1 &mdash; Grant of Licence</h3>
+      <p>Subject to your compliance with these Terms, the Operator grants you a limited, non-exclusive, non-transferable, revocable licence to install and use Snatchy on a device you own or control, solely for your personal, non-commercial entertainment.</p>
+
+      <h3 class="section-head-sm">1.2 &mdash; Restrictions</h3>
+      <p>You may not: reverse engineer, decompile, or disassemble the application; modify or create derivative works; sublicence, sell, or transfer the application or any rights therein; use the application for any commercial purpose without express written consent from the Operator; or attempt to gain unauthorised access to any portion of the service or its underlying infrastructure.</p>
+
+      <h3 class="section-head-sm">1.3 &mdash; Reservation of Rights</h3>
+      <p>All rights not expressly granted in this licence are reserved by the Operator. The application, its code, design, graphics, sounds, and all other elements are protected by intellectual property laws. Your licence to play does not constitute a transfer of ownership of any kind.</p>
+
+      <h3 class="section-head-sm">1.4 &mdash; Updates and Modifications</h3>
+      <p>The Operator reserves the right to update, modify, or discontinue Snatchy or any feature thereof at any time, with or without notice. Continued use of the application after an update constitutes acceptance of the updated version.</p>
+    </div>
+    <div class="col">
+      <h2 class="section-head">Article II: Player Conduct</h2>
+
+      <h3 class="section-head-sm">2.1 &mdash; Fair Play Obligations</h3>
+      <p>All players are expected to participate in good faith. You agree not to exploit bugs, glitches, or unintended game mechanics to gain an unfair advantage. If you discover a technical issue that could be exploited, you are encouraged to report it rather than abuse it.</p>
+
+      <h3 class="section-head-sm">2.2 &mdash; Player Names</h3>
+      <p>You are solely responsible for the player name you choose. You agree not to use a name that is offensive, harassing, discriminatory, defamatory, or that impersonates another person or entity. The Operator reserves the right, but not the obligation, to remove or modify names that violate this provision.</p>
+
+      <h3 class="section-head-sm">2.3 &mdash; Market Codes</h3>
+      <p>Market codes are shared voluntarily. By sharing a code with other players, you understand that anyone in possession of that code may join your market. The Operator bears no responsibility for uninvited participants who have obtained a code through any channel.</p>
+
+      <h3 class="section-head-sm">2.4 &mdash; Prohibited Conduct</h3>
+      <ul class="article-list">
+        <li>Attempting to disrupt, overload, or interfere with the Firebase backend or any other technical infrastructure.</li>
+        <li>Using automated scripts, bots, or other non-human means to play the game.</li>
+        <li>Colluding with other players in a manner designed to manipulate outcomes for competitive gain outside the natural mechanics of the game.</li>
+        <li>Impersonating any other player, real person, or the Operator.</li>
+        <li>Using the game in any way that violates applicable laws or regulations.</li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="section-rule">
+
+  <div class="columns-3">
+    <div class="col">
+      <h2 class="section-head">Article III: Disclaimers</h2>
+
+      <h3 class="section-head-sm">3.1 &mdash; No Warranties</h3>
+      <p>Snatchy is provided on an "as is" and "as available" basis, without warranties of any kind, express or implied. The Operator does not warrant that the application will be uninterrupted, error-free, secure, or free of viruses or other harmful components.</p>
+
+      <h3 class="section-head-sm">3.2 &mdash; Financial Simulation Only</h3>
+      <div class="notice-box">
+        <div class="notice-label">⚠ &nbsp; Important Disclaimer</div>
+        <p style="font-size:11.5px; margin:0;">Snatchy is a <strong>game of entertainment only</strong>. The cash notes, debt notes, scores, and market mechanics depicted therein have no monetary value whatsoever in the real world. Nothing in this application constitutes financial advice, investment guidance, or any representation about real-world markets.</p>
+      </div>
+
+      <h3 class="section-head-sm">3.3 &mdash; Third-Party Services</h3>
+      <p>The application relies on Firebase Firestore, which is a service of Google LLC. The Operator makes no representations about the availability, reliability, or performance of Firebase, and is not responsible for outages or data loss attributable to Firebase or other third-party infrastructure.</p>
+    </div>
+    <div class="col">
+      <h2 class="section-head">Article IV: Liability</h2>
+
+      <h3 class="section-head-sm">4.1 &mdash; Limitation of Liability</h3>
+      <p>To the maximum extent permitted by applicable law, in no event shall the Operator be liable for any indirect, incidental, special, consequential, or punitive damages arising out of or in connection with your use of Snatchy, even if advised of the possibility of such damages.</p>
+
+      <h3 class="section-head-sm">4.2 &mdash; Maximum Liability Cap</h3>
+      <p>In jurisdictions that do not permit the exclusion of liability described above, the Operator's total liability to you for any claim arising from or relating to these Terms or the application shall not exceed the amount you paid to obtain the application in the twelve months preceding the claim. As Snatchy is a free application, this cap is effectively zero in most cases.</p>
+
+      <h3 class="section-head-sm">4.3 &mdash; Indemnification</h3>
+      <p>You agree to defend, indemnify, and hold harmless the Operator and its affiliates from and against any claims, damages, obligations, losses, liabilities, and expenses arising from your violation of these Terms, your use of the application, or your infringement of any third-party right.</p>
+    </div>
+    <div class="col">
+      <h2 class="section-head">Article V: Intellectual Property</h2>
+
+      <h3 class="section-head-sm">5.1 &mdash; Ownership</h3>
+      <p>All content, features, and functionality of Snatchy — including but not limited to the source code, game logic, visual design, sound effects, typography, animations, and the game's name and branding — are owned by the Operator and are protected by applicable intellectual property law.</p>
+
+      <h3 class="section-head-sm">5.2 &mdash; Player Content</h3>
+      <p>The only "content" you contribute to Snatchy is your chosen player name and your gameplay activity. You grant the Operator a non-exclusive, royalty-free licence to use this information for the purposes described in the Privacy Policy.</p>
+
+      <h3 class="section-head-sm">5.3 &mdash; Feedback</h3>
+      <p>If you submit suggestions, ideas, or feedback regarding the application, you grant the Operator a perpetual, irrevocable, worldwide, royalty-free right to use such feedback for any purpose, including improving the application, without any obligation of compensation or attribution.</p>
+
+      <h3 class="section-head-sm">5.4 &mdash; Trademarks</h3>
+      <p>The name "Snatchy" and any associated logos or marks are trademarks of the Operator. You may not use these marks in connection with any product or service without prior written consent.</p>
+    </div>
+  </div>
+
+  <hr class="section-rule">
+
+  <div class="columns-2">
+    <div class="col">
+      <h2 class="section-head">Article VI: Termination</h2>
+
+      <h3 class="section-head-sm">6.1 &mdash; Termination by the Operator</h3>
+      <p>The Operator reserves the right to suspend or terminate your access to Snatchy at any time, with or without cause, and with or without notice. Grounds for termination include, without limitation, violations of these Terms, conduct that the Operator reasonably believes is harmful to the service or to other users, or legal requirements.</p>
+
+      <h3 class="section-head-sm">6.2 &mdash; Termination by You</h3>
+      <p>You may terminate your use of Snatchy at any time by simply deleting the application. Termination does not affect the Operator's rights or your obligations accrued prior to termination.</p>
+
+      <h3 class="section-head-sm">6.3 &mdash; Survival</h3>
+      <p>Provisions of these Terms that by their nature should survive termination — including, without limitation, the sections on intellectual property, disclaimers, limitation of liability, indemnification, and governing law — shall survive any termination of these Terms.</p>
+    </div>
+    <div class="col">
+      <h2 class="section-head">Article VII: General Provisions</h2>
+
+      <h3 class="section-head-sm">7.1 &mdash; Governing Law</h3>
+      <p>These Terms shall be governed by and construed in accordance with applicable law. Where the Operator is located in a specific jurisdiction, local laws shall apply. Nothing in these Terms limits any consumer rights you may have under the mandatory laws of your own country of residence.</p>
+
+      <h3 class="section-head-sm">7.2 &mdash; Dispute Resolution</h3>
+      <p>Any dispute arising from or related to these Terms or your use of Snatchy shall first be addressed informally by contacting the Operator. If informal resolution fails, disputes may be submitted to mediation or arbitration, or to the courts of competent jurisdiction.</p>
+
+      <h3 class="section-head-sm">7.3 &mdash; Severability</h3>
+      <p>If any provision of these Terms is found to be unenforceable or invalid, that provision shall be modified to the minimum extent necessary to make it enforceable, and the remaining provisions shall continue in full force and effect.</p>
+
+      <h3 class="section-head-sm">7.4 &mdash; Entire Agreement</h3>
+      <p>These Terms, together with the Privacy Policy, constitute the entire agreement between you and the Operator with respect to Snatchy and supersede all prior or contemporaneous communications and proposals.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ CONTACT ═══════════════════════════ -->
+
+<div class="label-divider">
+  <span>Part Three &nbsp;&mdash;&nbsp; Contact &amp; Requests</span>
+</div>
+
+<div class="full-col">
+  <div class="columns-2">
+    <div class="col" style="border-right:1px solid var(--ink); padding-left:0;">
+      <h2 class="section-head">How to Reach Us</h2>
+      <span class="byline">Contact Desk &nbsp;|&nbsp; Privacy &amp; Legal</span>
+      <p>To exercise your privacy rights, request deletion of your data, report a concern, or contact the Operator for any reason related to these policies, please use the support contact provided with the application listing or the project distribution page through which you obtained Snatchy.</p>
+      <p>When submitting a privacy request, please include a description of your request, the approximate date of your gameplay sessions, and any identifying information you can provide (such as the player name you used) to assist us in locating your records.</p>
+      <p>We are committed to responding to all legitimate requests within thirty (30) calendar days, or within any shorter period required by applicable law.</p>
+    </div>
+    <div class="col" style="padding-right:0;">
+      <div class="notice-box-dark" style="margin:0; height:100%; display:flex; flex-direction:column; justify-content:center;">
+        <div class="notice-label">✦ &nbsp; Summary of Commitments</div>
+        <ul class="article-list" style="padding:0; margin:0; list-style:none;">
+          <li style="color:var(--paper); border-color:rgba(237,229,197,0.2); padding:6px 0 6px 0;">We collect only what the game needs to function.</li>
+          <li style="color:var(--paper); border-color:rgba(237,229,197,0.2); padding:6px 0 6px 0;">We never sell your data.</li>
+          <li style="color:var(--paper); border-color:rgba(237,229,197,0.2); padding:6px 0 6px 0;">We use Firebase as our only data processor.</li>
+          <li style="color:var(--paper); border-color:rgba(237,229,197,0.2); padding:6px 0 6px 0;">We honour deletion and access requests.</li>
+          <li style="color:var(--paper); border-color:rgba(237,229,197,0.2); padding:6px 0 6px 0;">We do not serve children under 13.</li>
+          <li style="color:var(--paper); border-color:rgba(237,229,197,0.2); padding:6px 0 6px 0; border-bottom:none;">Scores are fictional. No real money changes hands.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
+
+<div class="footer">
+  <p><strong>Snatchy Legal Gazette</strong> &mdash; Privacy Policy &amp; Terms of Use</p>
+  <div class="footer-rule"></div>
+  <p>This document constitutes the complete and operative Privacy Policy and Terms of Use for the Snatchy application. It supersedes all prior versions. Continued use of the application signifies acceptance of these terms.</p>
+  <p style="margin-top:6px;">These policies are provided for informational purposes. Nothing herein constitutes legal advice. If you have specific legal concerns, consult a qualified legal professional.</p>
+  <div class="footer-rule"></div>
+  <p><em>Snatchy &mdash; Where Every Banker Plays for Keeps</em></p>
+  <p style="margin-top:6px; font-size:9px;">All market activity is simulated. No real currency is involved. Firebase is a trademark of Google LLC. All other marks are property of their respective owners.</p>
+</div>
+
+</body>
+</html>
